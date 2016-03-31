@@ -1,3 +1,0 @@
-#!/bin/bash
-
-$YAWS_DIR/bin/yaws --stop --id $YAWS_APP_ID
