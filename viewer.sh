@@ -1,1 +1,1 @@
-docker run -v ~/Desktop/Tsung/logs:/srv/logs -v ~/Desktop/Viewer/conf:/srv/yaws/conf -v ~/Desktop/Viewer/www:/srv/yaws/www -it viewer
+docker run -P -v ~/Desktop/IonCannon/Tsung/logs:/srv/logs -v ~/Desktop/IonCannon/Viewer/conf:/srv/yaws/conf -v ~/Desktop/Viewer/www:/srv/yaws/www -it -d viewer
