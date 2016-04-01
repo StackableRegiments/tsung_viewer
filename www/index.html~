@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/simalata.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css"></link>
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css"></link>
+    <title>Simalata</title>
+  </head>
+  <body>
+    <h1 class="col-md-4">Comparables</h1>
+    <h1 class="col-md-4">Comparators</h1>
+    <h1 class="col-md-4">Comparisons</h1>
+  </body>
+</html>

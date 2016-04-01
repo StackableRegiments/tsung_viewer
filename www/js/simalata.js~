@@ -1,0 +1,33 @@
+var Simalata = (function(){
+    var prime = function(pattern){
+	var onAggregate = function(aggregate){
+	    alert(aggregate);
+	}
+        pattern.collect([],onAggregate);
+    }
+    return {
+        prime:prime
+    };
+})();
+$(function(){
+    Simalata.prime({
+        collect:function(aggregator,onAggregate){
+            $.ajax({
+                url:"/logs",
+                success:function(resp){
+                    $(resp).find('a[name^="2016"]').map(function(a){
+                        var href = a.attr("href");
+                        $.ajax({
+                            url:"/logs/"+href+"/tsung.log",
+                            success:function(json){
+				console.log(json);
+                                aggregator.push(JSON.parse(json));
+				onAggregate(aggregator);
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    })
+});
