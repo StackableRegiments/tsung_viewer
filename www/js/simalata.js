@@ -3,7 +3,7 @@ var Simalata = (function(){
         prime:function(pattern){
             pattern.sample({},function(entries){
                 pattern.display(
-                    pattern.transform(entries)
+                    pattern.correct(entries)
                 );
             });
         }
@@ -32,45 +32,70 @@ $(function(){
                 }
             });
         },
-        transform:function(samples){
+        correct:function(samples){
             var runs = {};
             _.map(samples,function(sample,label){
                 var data = {};
                 sample.stats.map(function(instant){
                     instant.samples.map(function(sample){
-                        ensure(data,sample.name,{x:instant.timestamp,y:sample.value});
+                        ensure(data,sample.name,{x:new Date(instant.timestamp * 1000),y:sample.value});
                     });
                 });
+                data.label = label;
                 runs[label] = data;
             });
             return runs;
         },
         display:function(series){
             var comparables = $("#comparables").empty();
+            var comparators = $("#comparators").empty();
             var comparisons = $("#comparisons").empty();
-            _.each(series,function(serie,label){
-                $("<a />")
-                    .append($("<h3 />",{
-                        text:label,
-                        class:"comparable"
-                    }).click(function(){
-                        comparisons.empty();
-                        _.map(serie,function(sample,label){
-                            var id = _.uniqueId("g");
-                            $("<div />",{
-                                id:id,
-                                class:"comparison"
-                            }).appendTo(comparisons);
-                            MG.data_graphic({
-                                title:label,
-                                data:sample,
-                                height: 150,
-                                target: '#'+id,
-                                x_accessor: 'x',
-                                y_accessor: 'y'
-                            });
+            var updateDisplay = function(){
+                comparisons.empty();
+                var visibleSeries = _.filter(series,"visible");
+                _.each(filters,function(enabled,filter){
+                    if(enabled){
+                        var id = _.uniqueId("g");
+                        $("<div />",{
+                            id:id,
+                            class:"comparison"
+                        }).appendTo(comparisons);
+                        MG.data_graphic({
+                            title:filter,
+                            data:_.map(visibleSeries,function(serie){return serie[filter]}),
+                            height: 150,
+                            target: '#'+id,
+                            x_accessor: 'x',
+                            y_accessor: 'y'
                         });
-                    })).appendTo(comparables);
+                    }
+                });
+            }
+            var filter = function(container,label,action){
+                var outer = $("<div />").appendTo(container);
+                $("<input />",{
+                    type:"checkbox"
+                }).on("click",function(){
+                    action();
+                    updateDisplay();
+                }).appendTo(outer);
+                $("<label />",{
+                    text:label
+                }).appendTo(outer);
+            }
+            var filters = {};
+            _.each(series,function(serie,label){
+                _.map(serie,function(data,attribute){
+                    filters[attribute] = false;
+                });
+                filter(comparables,label,function(){
+                    serie.visible = !serie.visible;
+                });
+            });
+            _.each(filters,function(v,attribute){
+                filter(comparators,attribute,function(){
+                    filters[attribute] = !filters[attribute];
+                });
             });
         }
     });
