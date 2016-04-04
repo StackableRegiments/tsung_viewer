@@ -1,3 +1,6 @@
+.jumbotron{
+    font-family: 'Orbitron', sans-serif;
+}
 .comparable{
     display:block;
     margin-bottom:1em;
@@ -5,4 +8,7 @@
 }
 .comparison{
     display:inline-block;
+}
+.container-fluid{
+    max-width:1200px;
 }

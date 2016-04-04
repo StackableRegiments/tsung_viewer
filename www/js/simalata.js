@@ -19,13 +19,27 @@ $(function(){
             $.ajax({
                 url:"/logs",
                 success:function(resp){
+                    console.log(resp);
                     $(resp).find('a[href^="2016"]').map(function(i,a){
                         var href = $(a).attr("href");
                         $.ajax({
                             url:"/logs/"+href+"/tsung.log",
                             success:function(json){
-                                aggregator[href] = (JSON.parse(json));
-                                onAggregate(aggregator);
+                                json = json.replace(/\s/g,"");
+                                var close = "]}]}";
+                                if(_.endsWith(json,",")){
+                                    json =_.dropRight(json,1) + close;
+                                }
+                                if(!(_.endsWith(json,close))) {
+                                    json += close;
+                                }
+                                try{
+                                    aggregator[href] = JSON.parse(json);
+                                    onAggregate(aggregator);
+                                }
+                                catch(e){
+                                    console.log("parse failure",json);
+                                }
                             }
                         });
                     });
@@ -51,27 +65,37 @@ $(function(){
             var comparators = $("#comparators").empty();
             var comparisons = $("#comparisons").empty();
             var updateDisplay = function(){
-                comparisons.empty();
                 var visibleSeries = _.filter(series,"visible");
                 _.each(filters,function(enabled,filter){
+                    var id = "composite_"+filter;
                     if(enabled){
-                        var id = _.uniqueId("g");
-                        $("<div />",{
-                            id:id,
-                            class:"comparison"
-                        }).appendTo(comparisons);
-                        MG.data_graphic({
-                            title:filter,
-                            data:_.map(visibleSeries,function(serie){return serie[filter]}),
-                            height: 150,
-                            target: '#'+id,
-                            x_accessor: 'x',
-                            y_accessor: 'y'
-                        });
+                        if($("#"+id).length == 0){
+                            $("<div />",{
+                                id:id,
+                                class:"comparison"
+                            }).appendTo(comparisons);
+                        }
+                        var availableData = function(serie){
+                            return serie[filter];
+                        };
+                        var visibleData = _.filter(visibleSeries,availableData);
+                        if(visibleData.length > 0){
+                            MG.data_graphic({
+                                title:filter,
+                                data:_.map(visibleData,availableData),
+                                height: 150,
+                                target: '#'+id,
+                                x_accessor: 'x',
+                                y_accessor: 'y',
+                                interpolate:"monotone"
+                            });
+                        }
                     }
                 });
             }
+            var excluded = {label:true};
             var filter = function(container,label,action){
+                if(label in excluded) return;
                 var outer = $("<div />").appendTo(container);
                 $("<input />",{
                     type:"checkbox"
@@ -84,11 +108,11 @@ $(function(){
                 }).appendTo(outer);
             }
             var filters = {};
-            _.each(series,function(serie,label){
+            _.each(_.sortBy(series,"label"),function(serie){
                 _.map(serie,function(data,attribute){
                     filters[attribute] = false;
                 });
-                filter(comparables,label,function(){
+                filter(comparables,serie.label,function(){
                     serie.visible = !serie.visible;
                 });
             });
