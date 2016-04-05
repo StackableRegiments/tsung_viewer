@@ -51,7 +51,9 @@ $(function(){
     var filter = function(container,label,action){
         if(label in notGraphable) return;
         if(label in alreadyPresented) return;
-        var outer = $("<div />").appendTo(container);
+        var outer = $("<div />",{
+	    id:"filter_"+label
+	}).appendTo(container);
         $("<input />",{
             type:"checkbox"
         }).on("click",function(){
@@ -75,6 +77,9 @@ $(function(){
         });
         _.each(filters,function(v,attribute){
             filter(comparators,attribute,function(){
+		if(filters[attribute]){
+		    $("#composite_"+attribute).remove();
+		}
                 filters[attribute] = !filters[attribute];
             });
         });
@@ -106,12 +111,13 @@ $(function(){
     };
     var pull = function(){
         $.ajax({
-            url:"/logs",
+            url:"/logs/",
             complete:function(){
                 setTimeout(pull,5000);
             },
             success:function(resp){
-                $(resp).find('a[href^="2016"]').map(function(i,a){
+                var context = (new DOMParser()).parseFromString(resp , 'text/html');
+                $('a[href^="2016"]',context).map(function(i,a){
                     var href = $(a).attr("href");
                     if(href in series){
                         if(series[href].visible){
