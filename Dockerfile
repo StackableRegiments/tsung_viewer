@@ -1,6 +1,8 @@
-from isqad88/erl-yaws
+FROM debian:jessie
 MAINTAINER Chris Hagan<chris@stackableregiments.com>
 
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y yaws
 EXPOSE 80
 
-CMD ["yaws","--conf","/srv/yaws/conf/yaws.conf"]
+CMD ["yaws","--debug","--conf","/srv/yaws/conf/yaws.conf"]

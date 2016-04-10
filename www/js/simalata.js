@@ -86,7 +86,7 @@ $(function(){
     };
     var updateSeries = function(href){
         $.ajax({
-            url:"/logs/"+href+"/tsung.log",
+            url:"/tsung/"+href,
             success:function(json){
                 json = json.replace(/\s/g,"");
                 var close = "]}]}";
@@ -112,8 +112,8 @@ $(function(){
     var pull = function(){
         $.ajax({
             url:"/logs/",
-            complete:function(){
-                setTimeout(pull,5000);
+            complete:function(){//This is as fast as YAWS updates its logs.  Don't bother going any faster than this.
+                setTimeout(pull,10000);
             },
             success:function(resp){
                 var context = (new DOMParser()).parseFromString(resp , 'text/html');
